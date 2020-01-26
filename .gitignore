@@ -1,0 +1,6 @@
+aragoroEnv/*
+*__pycache__*
+*.pyc
+*__init__*
+.idea/*
+*.DS_Store
