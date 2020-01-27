@@ -19,7 +19,19 @@
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+
 <![endif]-->
+    <script src="/static/assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="/static/assets/libs/popper.js/dist/umd/popper.min.js"></script>
+    <script src="/static/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- apps -->
+    <!-- apps -->
+    <script src="/static/dist/js/app-style-switcher.js"></script>
+    <script src="/static/dist/js/feather.min.js"></script>
+    <script src="/static/assets/libs/perfect-scrollbar/dist/perfect-scrollbar.jquery.min.js"></script>
+    <script src="/static/dist/js/sidebarmenu.js"></script>
+    <!--Custom JavaScript -->
+    <script src="/static/dist/js/custom.min.js"></script>
 </head>
 
 <body>
@@ -162,6 +174,12 @@
                             </a>
                         </li>
                         <li class="sidebar-item ">
+                            <a class="sidebar-link sidebar-link" href="{% url 'todosCombos' %}" aria-expanded="false">
+                                <i class="icon-grid"></i>
+                                <span class="hide-menu">Todos os combos</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item ">
                             <a class="sidebar-link sidebar-link" href="{% url 'addProdutos' %}" aria-expanded="false">
                                 <i data-feather="plus" class="feather-icon"></i>
                                 <span class="hide-menu">Adicionar produto</span>
@@ -208,17 +226,6 @@
     <!-- ============================================================== -->
     <!-- All Jquery -->
     <!-- ============================================================== -->
-    <script src="/static/assets/libs/jquery/dist/jquery.min.js"></script>
-    <script src="/static/assets/libs/popper.js/dist/umd/popper.min.js"></script>
-    <script src="/static/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
-    <!-- apps -->
-    <!-- apps -->
-    <script src="/static/dist/js/app-style-switcher.js"></script>
-    <script src="/static/dist/js/feather.min.js"></script>
-    <script src="/static/assets/libs/perfect-scrollbar/dist/perfect-scrollbar.jquery.min.js"></script>
-    <script src="/static/dist/js/sidebarmenu.js"></script>
-    <!--Custom JavaScript -->
-    <script src="/static/dist/js/custom.min.js"></script>
 </body>
 
 </html>

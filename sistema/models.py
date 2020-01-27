@@ -12,6 +12,7 @@ class Produto(models.Model):
 class Pack(models.Model):
     produto = models.ForeignKey(Produto, on_delete=models.CASCADE)
     quantidade_do_pack = models.IntegerField(validators=[MinValueValidator(1,"Digite um valor maior que 1")])
+    valor_do_combro = models.DecimalField(validators=[MinValueValidator(0)], max_digits=7, decimal_places=2)
 
 class Venda(models.Model):
     FORMAS_DE_PAGAMENTO = [('CR', 'Crédito'), ('DE','Débito'), ('DI','Dinheiro')]
