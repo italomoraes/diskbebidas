@@ -1,12 +1,14 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout, authenticate, login
 from django.core.paginator import Paginator
 from django.contrib import messages
+from django.core import serializers
+from django.views.decorators.csrf import csrf_exempt
 from .models import *
 from .forms import *
-import decimal, datetime
+import decimal, datetime, json
 import pdb
 
 @login_required
@@ -99,6 +101,7 @@ def detalheProduto(request, pk):
 @login_required
 def detalheCombo(request, pk):
 	combo = Pack.objects.get(pk=pk)
+	produto = combo.produto
 	if request.method == 'POST':
 		form = editPackForm(request.POST, instance=combo)
 		if form.is_valid():
@@ -108,7 +111,7 @@ def detalheCombo(request, pk):
 			messages.add_message(request, messages.ERROR, 'Formulário inválido')
 	else:
 		form = editPackForm(instance=combo)
-	return render(request, 'detalheCombo.html', {"user": request.user, "form": form})
+	return render(request, 'detalheCombo.html', {"user": request.user, "form": form, "produto": produto})
 
 @login_required
 def addEstoque(request):
@@ -127,12 +130,33 @@ def addEstoque(request):
 			produto.quantidade_em_estoque = quantidade_em_estoque + quantidade_adicional
 			produto.valor_de_venda = custo_real*(1+(lucro/100))
 			produto.save()
+			if Pack.objects.filter(produto__codigo_de_barras=form.cleaned_data['codigo_de_barras']).exists():
+				return redirect('addEstoquePack', pk=produto.pk)
 			messages.add_message(request, messages.SUCCESS, 'Entrada cadastrada com sucesso para '+produto.descricao)
 		else:
 			messages.add_message(request, messages.ERROR, 'Formulário inválido')
 	else:
 		form = addEstoqueForm()
 	return render(request, 'addEstoque.html', {"user": request.user, "form": form})
+
+@login_required
+def addEstoquePack(request, pk):
+	if request.method == 'POST':
+		form = addEstoquePackForm(request.POST)
+		if form.is_valid():
+			pack = Pack.objects.get(produto__pk=pk)
+			pack.valor_do_combro = form.cleaned_data['valor_do_combro']
+			pack.save()
+			messages.add_message(request, messages.SUCCESS, 'Entrada cadastrada com sucesso para '+pack.produto.descricao)
+			return redirect('addEstoque')
+		else:
+			messages.add_message(request, messages.ERROR, 'Formulário inválido')
+	else:
+		produto = Produto.objects.get(pk=pk)
+		pack = Pack.objects.get(produto=produto)
+		form = addEstoquePackForm()
+		valor_sugerido = produto.valor_de_venda*pack.quantidade_do_pack
+	return render(request, 'addEstoquePack.html', {"user": request.user, "form": form, "pack": pack, "produto": produto, "valor_sugerido": valor_sugerido})
 
 @login_required
 def todasVendas(request):
@@ -171,7 +195,59 @@ def todasVendas(request):
 	vendas = paginator.get_page(page)
 	return render(request, 'vendas.html', {"user": request.user, "vendas": vendas, "total_dinheiro": total_dinheiro, "total_credito": total_credito, "total_debito": total_debito, "total_total": total_total, 'dia': dia, "inicio": data_inicial,"fim": data_final})
 
+@login_required
+def clicaPDV(request):
+	venda = Venda.objects.latest('pk')
+	if venda.finalizado:
+		venda_atual = Venda.objects.create(
+			valor_total = decimal.Decimal(0.0),
+			forma_de_pagamento = 'DI'
+		)
+	else:
+		venda_atual = venda
+	return redirect('pdv', pk=venda_atual.pk)
 
+@login_required
+def pdv(request, pk):
+	venda = Venda.objects.get(pk=pk)
+	return render(request, 'pdv.html', {"user": request.user, "pagina": "pdv", "venda": venda})
+
+@login_required
+def consultaprodutoapi(request):
+	codigo = request.GET.get('codigo')
+	produto = Produto.objects.filter(codigo_de_barras=codigo)
+	response = serializers.serialize("json", produto)
+	return JsonResponse(response, safe=False)
+
+@login_required
+def getprodutosvendaatual(request):
+	venda = Venda.objects.latest('pk')
+	produtos_vendidos = ProdutoVendido.objects.filter(venda=venda)
+	return JsonResponse(serializers.serialize("json", produtos_vendidos), safe=False)
+
+@login_required
+@csrf_exempt
+def addprodutotocart(request):
+	data = json.loads(request.body)
+	produto = Produto.objects.get(pk=data.get('produto_pk'))
+	venda = Venda.objects.get(pk=data.get('venda_pk'))
+	produto_sendo_vendido = ProdutoVendido.objects.filter(venda=venda).filter(codigo_de_barras=produto.codigo_de_barras)
+	quantidade = int(data.get('qtd'))
+	if produto_sendo_vendido.exists():
+		produto_vendido = produto_sendo_vendido.first()
+		produto_vendido.quantidade_vendida += quantidade
+		produto_vendido.save()
+	else:
+		ProdutoVendido.objects.create(
+			venda = venda,
+			codigo_de_barras = produto.codigo_de_barras,
+			descricao = produto.descricao,
+			valor_de_venda = produto.valor_de_venda,
+			valor_de_compra = produto.valor_de_compra,
+			quantidade_vendida = quantidade
+		)
+	produtos_vendidos = ProdutoVendido.objects.filter(venda=venda)
+	return JsonResponse(serializers.serialize("json", produtos_vendidos), safe=False)
 
 
 

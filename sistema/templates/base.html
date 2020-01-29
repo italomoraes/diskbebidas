@@ -144,21 +144,21 @@
                 <nav class="sidebar-nav">
                     <ul id="sidebarnav">
                         <li class="sidebar-item">
-                            <a class="sidebar-link sidebar-link" href="{% url 'index' %}" aria-expanded="false">
+                            <a class="sidebar-link" href="{% url 'index' %}" aria-expanded="false">
                                 <i data-feather="home" class="feather-icon"></i>
                                 <span class="hide-menu">Dashboard</span>
                             </a>
                         </li>
                         <li class="list-divider"></li>
                         <li class="nav-small-cap"><span class="hide-menu">Vendas</span></li>
-                        <li class="sidebar-item"> 
-                            <a class="sidebar-link" href="ticket-list.html" aria-expanded="false">
+                        <li class="sidebar-item {% if pagina == 'pdv' %}selected{% endif %}"> 
+                            <a class="sidebar-link" href="{% url 'clicaPDV' %}" aria-expanded="false">
                                 <i class="icon-basket"></i>
                                 <span class="hide-menu">PDV</span>
                             </a>
                         </li>
                         <li class="sidebar-item"> 
-                            <a class="sidebar-link sidebar-link" href="{% url 'todasVendas' %}" aria-expanded="false">
+                            <a class="sidebar-link" href="{% url 'todasVendas' %}" aria-expanded="false">
                                 <i class="icon-drawar"></i>
                                 <span class="hide-menu">Vendas registradas</span>
                             </a>
@@ -196,7 +196,7 @@
                         <li class="list-divider"></li>
                         <li class="nav-small-cap"><span class="hide-menu">Extra</span></li>
                         <li class="sidebar-item"> 
-                            <a class="sidebar-link sidebar-link" href="authentication-login1.html" aria-expanded="false">
+                            <a class="sidebar-link sidebar-link" href="/accounts/logout/" aria-expanded="false">
                                 <i data-feather="log-out" class="feather-icon"></i>
                                 <span class="hide-menu">Sair</span>
                             </a>
