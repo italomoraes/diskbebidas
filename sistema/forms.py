@@ -13,11 +13,11 @@ def valida_codigo_de_barras_nao_existe(codigo):
         raise ValidationError('Produto já cadastrado')
 
 class editPackForm(forms.ModelForm):
-    produto = forms.CharField()
+    produto = forms.CharField(disabled=True)
     quantidade_do_pack = forms.IntegerField(validators=[MinValueValidator(1,"Digite um valor maior que 1")])
     valor_do_combro = forms.DecimalField(validators=[MinValueValidator(0)], max_digits=7, decimal_places=2)
 
-    produto.widget.attrs.update({'class': 'form-control col-3','style':'disabled: true;'})
+    produto.widget.attrs.update({'class': 'form-control col-3'})
     quantidade_do_pack.widget.attrs.update({'class': 'form-control col-3'})
     valor_do_combro.widget.attrs.update({'class': 'form-control col-3'})
 
@@ -73,5 +73,13 @@ class addEstoqueForm(forms.Form):
     valor_de_compra.widget.attrs.update({'class': 'form-control col-3', 'placeholder': 'R$'})
     lucro_em_porcentagem.widget.attrs.update({'class': 'form-control col-3','placeholder': '%'})
     quantidade_adicional.widget.attrs.update({'class': 'form-control col-3'})
+
+
+class addEstoquePackForm(forms.Form):
+    valor_do_combro = forms.DecimalField(validators=[MinValueValidator(0)], max_digits=7, decimal_places=2)
+
+    valor_do_combro.widget.attrs.update({'class': 'form-control col-3'})
+
+
 
 

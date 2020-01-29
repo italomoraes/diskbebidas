@@ -49,11 +49,25 @@
 									{% endif %}
                                 	{% csrf_token %}
                                 	<div class="form-body">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Código: </label>
+                                                    <input type="text" class="form-control" disabled value="{{ produto.codigo_de_barras }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="form-group">
+                                                    <label>Descrição: </label>
+                                                    <input type="text" class="form-control" disabled value="{{ produto.descricao }}">
+                                                </div>
+                                            </div>
+                                        </div>
                                 		{{ form }}
                                     </div>
                                     <div class="form-actions">
                                         <div class="text-right">
-                                            <button type="submit" class="btn btn-info">Salvar</button>
+                                            <button type="submit" class="btn btn-success">Salvar</button>
                                         </div>
                                     </div>
                                 </form>
