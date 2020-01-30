@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+    {% block content %}
+        <div class="page-wrapper">
+            <!-- ============================================================== -->
+            <!-- Bread crumb and right sidebar toggle -->
+            <!-- ============================================================== -->
+            <div class="page-breadcrumb">
+                <div class="row">
+                    <div class="col-7 align-self-center">
+                        <h4 class="page-title text-truncate text-dark font-weight-medium mb-1">Vendas registradas</h4>
+                        <div class="d-flex align-items-center">
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb m-0 p-0">
+                                    <li class="breadcrumb-item"><a class="text-muted">Vendas</a></li>
+                                    <li class="breadcrumb-item text-muted active" aria-current="page">Vendas registradas</li>
+                                    <li class="breadcrumb-item text-muted active" aria-current="page">Detalhes</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ============================================================== -->
+            <!-- End Bread crumb and right sidebar toggle -->
+            <!-- ============================================================== -->
+            <!-- ============================================================== -->
+            <!-- Container fluid  -->
+            <!-- ============================================================== -->
+            <div class="container-fluid">
+                <!-- ============================================================== -->
+                <!-- Start Page Content -->
+                <!-- ============================================================== -->
+                <!-- basic table -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-3">
+                                        <label>Data: </label>
+                                        <h5 class="input-sm text-center form-control">{{ venda_obj.data_e_hora.date }}</h5>
+                                    </div>
+                                    <div class="col-3">
+                                        <label>Hora: </label>
+                                        <h5 class="input-sm text-center form-control">{{ venda_obj.data_e_hora.time }}</h5>
+                                    </div>
+                                </div>
+                                </br>
+                                <div class="row">
+                                    <div class="col-3">
+                                        <label>Valor dos produtos: </label>
+                                        <h5 class="input-sm text-center form-control">R$ {{ venda_obj.valor_total }}</h5>
+                                    </div>
+                                    <div class="col-3">
+                                        <label>Desconto: </label>
+                                        <h5 class="input-sm text-center form-control">R$ {{ venda_obj.desconto }}</h5>
+                                    </div>
+                                    <div class="col-3">
+                                        <label>Valor final: </label>
+                                        <h5 class="input-sm text-center form-control">R$ {{ venda.valor_final }}</h5>
+                                    </div>
+                                    <div class="col-3">
+                                        <label>Lucro:</label>
+                                        <div class="row">
+                                            <h5 class="input-sm text-center form-control col-6">R$ {{ venda.lucro_moeda }}</h5>
+                                            <h5 class="input-sm text-center form-control col-6">{{ venda.lucro_porcentagem|floatformat:2 }}%</h5>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                </br>
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" colspan="4" class="text-center">Produtos</th>
+                                            </tr>
+                                        </thead>
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Código</th>
+                                                <th scope="col">Descrição</th>
+                                                <th scope="col">Preço na venda</th>
+                                                <th scope="col">Quantidade</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for produto in produtos_vendidos %}
+                                            <tr>
+                                                <td><span class="badge badge-medium-warning">{{ produto.codigo_de_barras }}</span></td>
+                                                <td><span class="font-weight-light link">{{ produto.descricao }}</span></td>
+                                                <td><span class="badge badge-light-warning">{{ produto.valor_de_venda }}</span></td>
+                                                <td><span class="badge badge-light-warning">{{ produto.quantidade_vendida }}</span></td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ============================================================== -->
+            <!-- End Container fluid  -->
+            <!-- ============================================================== -->
+            <script src="https://unpkg.com/bootstrap-datepicker@1.9.0/dist/js/bootstrap-datepicker.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.pt-BR.min.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.standalone.css">
+        </div>
+    {% endblock %}

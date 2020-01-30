@@ -13,7 +13,7 @@ import pdb
 
 @login_required
 def dashboard(request):
-	return render(request, "base.html")
+	return redirect('clicaPDV')
 
 @login_required
 def todosProdutos(request):
@@ -165,10 +165,10 @@ def todasVendas(request):
 	data_final = ''
 	if dia == None or dia == 'hoje':
 		data = datetime.date.today()
-		vendas = Venda.objects.filter(data_e_hora__date=data).order_by('data_e_hora')
+		vendas = Venda.objects.filter(data_e_hora__date=data).filter(finalizado=True).order_by('-data_e_hora')
 	elif dia == 'ontem':
 		data = datetime.date.today() + datetime.timedelta(days=-1)
-		vendas = Venda.objects.filter(data_e_hora__date=data).order_by('data_e_hora')
+		vendas = Venda.objects.filter(data_e_hora__date=data).filter(finalizado=True).order_by('-data_e_hora')
 	elif dia == 'personalizado':
 		if len(request.GET) == 3:
 			holder_inicial = request.GET.get('inicial').split('-')
@@ -177,19 +177,19 @@ def todasVendas(request):
 			data_final = datetime.date(int(holder_final[2]),int(holder_final[1]),int(holder_final[0])) # yyyy, mm, dd
 			vendas = Venda.objects.filter(data_e_hora__date__range=[data_inicial,data_final]).order_by('data_e_hora')
 		else:
-			vendas = Venda.objects.all().order_by('data_e_hora')
+			vendas = Venda.objects.all().filter(finalizado=True).order_by('-data_e_hora')
 	total_dinheiro = decimal.Decimal('0.0')
 	total_credito = decimal.Decimal('0.0')
 	total_debito = decimal.Decimal('0.0')
 	total_total = decimal.Decimal('0.0')
 	for venda in vendas:
 		if venda.forma_de_pagamento == 'DI':
-			total_dinheiro += venda.valor_total
+			total_dinheiro += (venda.valor_total-venda.desconto)
 		elif venda.forma_de_pagamento == 'CR':
-			total_credito += venda.valor_total
+			total_credito += (venda.valor_total-venda.desconto)
 		elif venda.forma_de_pagamento == 'DE':
-			total_debito += venda.valor_total
-		total_total += venda.valor_total
+			total_debito += (venda.valor_total-venda.desconto)
+		total_total += (venda.valor_total-venda.desconto)
 	paginator = Paginator(vendas, 30)
 	page = request.GET.get('page')
 	vendas = paginator.get_page(page)
@@ -201,7 +201,8 @@ def clicaPDV(request):
 	if venda.finalizado:
 		venda_atual = Venda.objects.create(
 			valor_total = decimal.Decimal(0.0),
-			forma_de_pagamento = 'DI'
+			forma_de_pagamento = 'DI',
+			desconto = decimal.Decimal(0)
 		)
 	else:
 		venda_atual = venda
@@ -213,21 +214,23 @@ def pdv(request, pk):
 	return render(request, 'pdv.html', {"user": request.user, "pagina": "pdv", "venda": venda})
 
 @login_required
-def consultaprodutoapi(request):
-	codigo = request.GET.get('codigo')
-	produto = Produto.objects.filter(codigo_de_barras=codigo)
-	response = serializers.serialize("json", produto)
-	return JsonResponse(response, safe=False)
+def consultaProdutoApi(request):
+	pesquisa = request.GET.get('pesquisa')
+	if pesquisa.isnumeric() and len(pesquisa) >= 4:
+		produtos = Produto.objects.filter(codigo_de_barras=pesquisa)
+	else:
+		produtos = Produto.objects.filter(descricao__icontains=pesquisa)
+	return JsonResponse(serializers.serialize("json", produtos), safe=False)
 
 @login_required
-def getprodutosvendaatual(request):
+def getProdutosVendaAtual(request):
 	venda = Venda.objects.latest('pk')
 	produtos_vendidos = ProdutoVendido.objects.filter(venda=venda)
 	return JsonResponse(serializers.serialize("json", produtos_vendidos), safe=False)
 
 @login_required
 @csrf_exempt
-def addprodutotocart(request):
+def addProdutoToCart(request):
 	data = json.loads(request.body)
 	produto = Produto.objects.get(pk=data.get('produto_pk'))
 	venda = Venda.objects.get(pk=data.get('venda_pk'))
@@ -250,7 +253,63 @@ def addprodutotocart(request):
 	return JsonResponse(serializers.serialize("json", produtos_vendidos), safe=False)
 
 
+@login_required
+@csrf_exempt
+def alteraProdutoOnCart(request):
+	data = json.loads(request.body)
+	quantidade = int(data.get('qtd'))
+	produto_sendo_alterado = ProdutoVendido.objects.get(pk=data.get('produto_pk'))
+	produto_sendo_alterado.quantidade_vendida += quantidade
+	if produto_sendo_alterado.quantidade_vendida == 0:
+		produto_sendo_alterado.delete()
+	else:
+		produto_sendo_alterado.save()
+	produtos_vendidos = ProdutoVendido.objects.filter(venda__pk=data.get('venda_pk'))
+	return JsonResponse(serializers.serialize("json", produtos_vendidos), safe=False)
 
 
+@login_required
+@csrf_exempt
+def finalizarVenda(request):
+	data = json.loads(request.body)
+	venda = Venda.objects.get(pk=data.get('venda_pk'))
+	venda.desconto = decimal.Decimal(data.get('desconto'))
+	venda.forma_de_pagamento = data.get('forma_de_pagamento')
+	venda.valor_total = data.get('valor_total')
+	venda.data_e_hora = datetime.datetime.now()
+	produtos_vendidos = ProdutoVendido.objects.filter(venda=venda)
+	for produto in produtos_vendidos:
+		produto_a_subtrair = Produto.objects.get(codigo_de_barras=produto.codigo_de_barras)
+		produto_a_subtrair.quantidade_em_estoque -= produto.quantidade_vendida
+		produto_a_subtrair.save()
+	venda.finalizado = True
+	venda.save()
+	return HttpResponse(status=200)
+
+
+@login_required
+@csrf_exempt
+def cancelarVenda(request):
+	data = json.loads(request.body)
+	produtos = ProdutoVendido.objects.filter(venda__pk=data.get('venda_pk'))
+	for produto in produtos:
+		produto.delete()
+	return HttpResponse(status=200)
+
+@login_required
+def detalheVenda(request, pk):
+	venda_obj = Venda.objects.get(pk=pk)
+	valor_final = venda_obj.valor_total - venda_obj.desconto
+	produtos_vendidos = ProdutoVendido.objects.filter(venda=venda_obj)
+	valor_de_custo = 0;
+	for produto in produtos_vendidos:
+		valor_de_custo += (produto.valor_de_compra*produto.quantidade_vendida)
+	lucro_moeda = valor_final - valor_de_custo
+	venda = {
+		'valor_final': valor_final,
+		'lucro_moeda': lucro_moeda,
+		'lucro_porcentagem': (lucro_moeda/valor_final)*100
+	}
+	return render(request, 'detalheVenda.html', {"user": request.user, "venda_obj": venda_obj, "venda": venda, "produtos_vendidos": produtos_vendidos})
 
 
