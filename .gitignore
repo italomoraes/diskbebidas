@@ -4,3 +4,5 @@ aragoroEnv/*
 *__init__*
 .idea/*
 *.DS_Store
+sistema/migrations/*
+*db.sqlite3*
