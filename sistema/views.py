@@ -8,7 +8,7 @@ from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
 from .forms import *
-import decimal, datetime, json
+import decimal, datetime, json, math
 import pdb
 
 @login_required
@@ -31,7 +31,7 @@ def todosProdutos(request):
 		paginator = Paginator(produtos, 30)
 		page = request.GET.get('page')
 		produtos = paginator.get_page(page)
-	return render(request, "produtos.html", {"user": request.user, "produtos": produtos})
+	return render(request, "produtos.html", {"pagina": "todosProdutos", "user": request.user, "produtos": produtos})
 
 @login_required
 def todosCombos(request):
@@ -49,7 +49,7 @@ def todosCombos(request):
 		paginator = Paginator(combos, 30)
 		page = request.GET.get('page')
 		combos = paginator.get_page(page)
-	return render(request, "combos.html", {"user": request.user, "combos": combos})
+	return render(request, "combos.html", {"pagina": "todosCombos", "user": request.user, "combos": combos})
 
 @login_required
 def addProdutos(request):
@@ -82,7 +82,7 @@ def addProdutos(request):
 			messages.add_message(request, messages.ERROR, 'Formulário inválido')
 	else:
 		form = produtoForm()
-	return render(request, "addProdutos.html", {"user": request.user, "form": form})
+	return render(request, "addProdutos.html", {"pagina": "addProdutos", "user": request.user, "form": form})
 
 @login_required
 def detalheProduto(request, pk):
@@ -96,7 +96,7 @@ def detalheProduto(request, pk):
 			messages.add_message(request, messages.ERROR, 'Formulário inválido')
 	else:
 		form = editProdutoForm(instance=produto)
-	return render(request, 'detalheProduto.html', {"user": request.user, "form": form})
+	return render(request, 'detalheProduto.html', {"pagina": "todosProdutos", "user": request.user, "form": form})
 
 @login_required
 def detalheCombo(request, pk):
@@ -111,7 +111,7 @@ def detalheCombo(request, pk):
 			messages.add_message(request, messages.ERROR, 'Formulário inválido')
 	else:
 		form = editPackForm(instance=combo)
-	return render(request, 'detalheCombo.html', {"user": request.user, "form": form, "produto": produto})
+	return render(request, 'detalheCombo.html', {"pagina": "todosCombos", "user": request.user, "form": form, "produto": produto})
 
 @login_required
 def addEstoque(request):
@@ -137,7 +137,7 @@ def addEstoque(request):
 			messages.add_message(request, messages.ERROR, 'Formulário inválido')
 	else:
 		form = addEstoqueForm()
-	return render(request, 'addEstoque.html', {"user": request.user, "form": form})
+	return render(request, 'addEstoque.html', {"pagina": "addEstoque", "user": request.user, "form": form})
 
 @login_required
 def addEstoquePack(request, pk):
@@ -156,7 +156,22 @@ def addEstoquePack(request, pk):
 		pack = Pack.objects.get(produto=produto)
 		form = addEstoquePackForm()
 		valor_sugerido = produto.valor_de_venda*pack.quantidade_do_pack
-	return render(request, 'addEstoquePack.html', {"user": request.user, "form": form, "pack": pack, "produto": produto, "valor_sugerido": valor_sugerido})
+	return render(request, 'addEstoquePack.html', {"pagina": "addEstoque", "user": request.user, "form": form, "pack": pack, "produto": produto, "valor_sugerido": valor_sugerido})
+
+@login_required
+def addCombo(request):
+	if request.method == 'POST':
+		form = addComboForm(request.POST)
+		if form.is_valid():
+			# produto = Produto.objects.get(codigo_de_barras=)
+			combo = form.save()
+			messages.add_message(request, messages.SUCCESS, 'Entrada cadastrada com sucesso para '+combo.produto.descricao)
+		else:
+			messages.add_message(request, messages.ERROR, 'Formulário inválido')
+	else:
+		form = addComboForm()
+	return render(request, 'addCombo.html', {"pagina": "addCombo", "user": request.user, "form": form})
+
 
 @login_required
 def todasVendas(request):
@@ -193,7 +208,23 @@ def todasVendas(request):
 	paginator = Paginator(vendas, 30)
 	page = request.GET.get('page')
 	vendas = paginator.get_page(page)
-	return render(request, 'vendas.html', {"user": request.user, "vendas": vendas, "total_dinheiro": total_dinheiro, "total_credito": total_credito, "total_debito": total_debito, "total_total": total_total, 'dia': dia, "inicio": data_inicial,"fim": data_final})
+	return render(request, 'vendas.html', {"pagina": "todasVendas", "user": request.user, "vendas": vendas, "total_dinheiro": total_dinheiro, "total_credito": total_credito, "total_debito": total_debito, "total_total": total_total, 'dia': dia, "inicio": data_inicial,"fim": data_final})
+
+@login_required
+def detalheVenda(request, pk):
+	venda_obj = Venda.objects.get(pk=pk)
+	valor_final = venda_obj.valor_total - venda_obj.desconto
+	produtos_vendidos = ProdutoVendido.objects.filter(venda=venda_obj)
+	valor_de_custo = 0;
+	for produto in produtos_vendidos:
+		valor_de_custo += (produto.valor_de_compra*produto.quantidade_vendida)
+	lucro_moeda = valor_final - valor_de_custo
+	venda = {
+		'valor_final': valor_final,
+		'lucro_moeda': lucro_moeda,
+		'lucro_porcentagem': (lucro_moeda/valor_final)*100
+	}
+	return render(request, 'detalheVenda.html', {"pagina": "todasVendas", "user": request.user, "venda_obj": venda_obj, "venda": venda, "produtos_vendidos": produtos_vendidos})
 
 @login_required
 def clicaPDV(request):
@@ -211,7 +242,10 @@ def clicaPDV(request):
 @login_required
 def pdv(request, pk):
 	venda = Venda.objects.get(pk=pk)
-	return render(request, 'pdv.html', {"user": request.user, "pagina": "pdv", "venda": venda})
+	return render(request, 'pdv.html', {"pagina": "pdv", "user": request.user, "pagina": "pdv", "venda": venda})
+
+
+# Api Views
 
 @login_required
 def consultaProdutoApi(request):
@@ -239,9 +273,8 @@ def addProdutoToCart(request):
 	if produto_sendo_vendido.exists():
 		produto_vendido = produto_sendo_vendido.first()
 		produto_vendido.quantidade_vendida += quantidade
-		produto_vendido.save()
 	else:
-		ProdutoVendido.objects.create(
+		produto_vendido = ProdutoVendido.objects.create(
 			venda = venda,
 			codigo_de_barras = produto.codigo_de_barras,
 			descricao = produto.descricao,
@@ -249,6 +282,13 @@ def addProdutoToCart(request):
 			valor_de_compra = produto.valor_de_compra,
 			quantidade_vendida = quantidade
 		)
+	combo = Pack.objects.get(produto__codigo_de_barras=produto_vendido.codigo_de_barras)
+	if produto_vendido.quantidade_vendida >= combo.quantidade_do_pack:
+		numero_de_combos = math.floor(produto_vendido.quantidade_vendida/combo.quantidade_do_pack)
+		produto_vendido.desconto_combo = numero_de_combos*((combo.quantidade_do_pack*produto_vendido.valor_de_venda)-combo.valor_do_combro)
+	else:
+		produto_vendido.desconto_combo = 0
+	produto_vendido.save()
 	produtos_vendidos = ProdutoVendido.objects.filter(venda=venda)
 	return JsonResponse(serializers.serialize("json", produtos_vendidos), safe=False)
 
@@ -259,10 +299,16 @@ def alteraProdutoOnCart(request):
 	data = json.loads(request.body)
 	quantidade = int(data.get('qtd'))
 	produto_sendo_alterado = ProdutoVendido.objects.get(pk=data.get('produto_pk'))
+	combo = Pack.objects.get(produto__codigo_de_barras=produto_sendo_alterado.codigo_de_barras)
 	produto_sendo_alterado.quantidade_vendida += quantidade
 	if produto_sendo_alterado.quantidade_vendida == 0:
 		produto_sendo_alterado.delete()
+	elif produto_sendo_alterado.quantidade_vendida >= combo.quantidade_do_pack:
+		numero_de_combos = math.floor(produto_sendo_alterado.quantidade_vendida/combo.quantidade_do_pack)
+		produto_sendo_alterado.desconto_combo = numero_de_combos*((combo.quantidade_do_pack*produto_sendo_alterado.valor_de_venda)-combo.valor_do_combro)
+		produto_sendo_alterado.save()
 	else:
+		produto_sendo_alterado.desconto_combo = 0
 		produto_sendo_alterado.save()
 	produtos_vendidos = ProdutoVendido.objects.filter(venda__pk=data.get('venda_pk'))
 	return JsonResponse(serializers.serialize("json", produtos_vendidos), safe=False)
@@ -295,21 +341,4 @@ def cancelarVenda(request):
 	for produto in produtos:
 		produto.delete()
 	return HttpResponse(status=200)
-
-@login_required
-def detalheVenda(request, pk):
-	venda_obj = Venda.objects.get(pk=pk)
-	valor_final = venda_obj.valor_total - venda_obj.desconto
-	produtos_vendidos = ProdutoVendido.objects.filter(venda=venda_obj)
-	valor_de_custo = 0;
-	for produto in produtos_vendidos:
-		valor_de_custo += (produto.valor_de_compra*produto.quantidade_vendida)
-	lucro_moeda = valor_final - valor_de_custo
-	venda = {
-		'valor_final': valor_final,
-		'lucro_moeda': lucro_moeda,
-		'lucro_porcentagem': (lucro_moeda/valor_final)*100
-	}
-	return render(request, 'detalheVenda.html', {"user": request.user, "venda_obj": venda_obj, "venda": venda, "produtos_vendidos": produtos_vendidos})
-
 

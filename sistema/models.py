@@ -9,8 +9,11 @@ class Produto(models.Model):
     valor_de_compra = models.DecimalField(validators=[MinValueValidator(0)],max_digits=7, decimal_places=2)
     quantidade_em_estoque = models.IntegerField(validators=[MinValueValidator(0)])
 
+    def __str__(self):
+        return self.descricao
+
 class Pack(models.Model):
-    produto = models.ForeignKey(Produto, on_delete=models.CASCADE)
+    produto = models.OneToOneField(Produto, on_delete=models.CASCADE)
     quantidade_do_pack = models.IntegerField(validators=[MinValueValidator(1,"Digite um valor maior que 1")])
     valor_do_combro = models.DecimalField(validators=[MinValueValidator(0)], max_digits=7, decimal_places=2)
 
@@ -29,3 +32,4 @@ class ProdutoVendido(models.Model):
     valor_de_venda = models.DecimalField(validators=[MinValueValidator(0)],max_digits=7, decimal_places=2)
     valor_de_compra = models.DecimalField(validators=[MinValueValidator(0)],max_digits=7, decimal_places=2)
     quantidade_vendida = models.IntegerField(validators=[MinValueValidator(0)])
+    desconto_combo = models.DecimalField(validators=[MinValueValidator(0)], max_digits=7, decimal_places=2, default=0)

@@ -224,6 +224,24 @@
 		                                            </tr>
 		                                        </tbody>
 		                                    </table>
+                                            </br></br>
+                                            <table class="table table-sm" ng-if="descontoComboFlag">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col" colspan="2" class="text-center">Descontos de combos</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="col">Descrição</th>
+                                                        <th scope="col">Desconto</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="item in itensNoCarrinho" ng-if="item.fields.desconto_combo > 0">
+                                                        <td><span class="font-weight-light">Desconto combo de {[{ item.fields.descricao }]}</span></td>
+                                                        <td><span class="font-weight-light">R$ -{[{ item.fields.desconto_combo | number : 2 }]}</span></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
 		                                </div>
                             		</div>
                             	</div>

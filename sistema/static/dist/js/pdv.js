@@ -31,6 +31,7 @@ app.controller('controlesCtrl', function($scope, $http){
 	$scope.formasDePagamento = [{"nome": "Dinheiro", "valor": "DI"}, {"nome": "Crédito", "valor": "CR"}, {"nome": "Débito", "valor": "DE"}];
 	$scope.finalizaMensagensFlag = false;
 	$scope.finalizaMensagem;
+	$scope.descontoComboFlag = false;
 
 	$('#addModal').on('shown.bs.modal', function () {
 		$('#qtd_modal').trigger('focus')
@@ -54,9 +55,13 @@ app.controller('controlesCtrl', function($scope, $http){
 			let data = JSON.parse(response.data);
 			$scope.itensNoCarrinho = [];
 			$scope.valorTotalDoCarrinho = 0.00;
+			$scope.descontoComboFlag = false;
 			angular.forEach(data, (produto) => {
 				$scope.itensNoCarrinho.push(produto);
-				$scope.valorTotalDoCarrinho += (produto.fields.valor_de_venda*produto.fields.quantidade_vendida);
+				$scope.valorTotalDoCarrinho += ((produto.fields.valor_de_venda*produto.fields.quantidade_vendida)-produto.fields.desconto_combo);
+				if(produto.fields.desconto_combo > 0){
+					$scope.descontoComboFlag = true;
+				}
 			});
 		}, err => {
 			$scope.erroTexto = "Ocorreu um erro enquanto tentávamos efetuar a operação desejada. Tente novamente.";
@@ -102,9 +107,13 @@ app.controller('controlesCtrl', function($scope, $http){
 			let data = JSON.parse(response.data);
 			$scope.itensNoCarrinho = [];
 			$scope.valorTotalDoCarrinho = 0.00;
+			$scope.descontoComboFlag = false;
 			angular.forEach(data, (produto) => {
 				$scope.itensNoCarrinho.push(produto);
-				$scope.valorTotalDoCarrinho += (produto.fields.valor_de_venda*produto.fields.quantidade_vendida);
+				$scope.valorTotalDoCarrinho += ((produto.fields.valor_de_venda*produto.fields.quantidade_vendida)-produto.fields.desconto_combo);
+				if(produto.fields.desconto_combo > 0){
+					$scope.descontoComboFlag = true;
+				}
 			});
 		}, err => {
 			$scope.erroTexto = "Ocorreu um erro enquanto tentávamos efetuar a operação desejada. Tente novamente.";
@@ -119,9 +128,13 @@ app.controller('controlesCtrl', function($scope, $http){
 			let data = JSON.parse(response.data);
 			$scope.itensNoCarrinho = [];
 			$scope.valorTotalDoCarrinho = 0.00;
+			$scope.descontoComboFlag = false;
 			angular.forEach(data, (produto) => {
 				$scope.itensNoCarrinho.push(produto);
-				$scope.valorTotalDoCarrinho += (produto.fields.valor_de_venda*produto.fields.quantidade_vendida);
+				$scope.valorTotalDoCarrinho += ((produto.fields.valor_de_venda*produto.fields.quantidade_vendida)-produto.fields.desconto_combo);
+				if(produto.fields.desconto_combo > 0){
+					$scope.descontoComboFlag = true;
+				}
 			});
 		}, err => {
 			$scope.erroTexto = "Ocorreu um erro enquanto tentávamos efetuar a operação desejada. Tente novamente.";

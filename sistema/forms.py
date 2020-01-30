@@ -81,5 +81,15 @@ class addEstoquePackForm(forms.Form):
     valor_do_combro.widget.attrs.update({'class': 'form-control col-3'})
 
 
+class addComboForm(forms.ModelForm):
+    produto = forms.ModelChoiceField(queryset=Produto.objects.all())
+    quantidade_do_pack = forms.IntegerField(validators=[MinValueValidator(0)])
+    valor_do_combro = forms.DecimalField(validators=[MinValueValidator(0)], max_digits=7, decimal_places=2)
 
+    produto.widget.attrs.update({'class': 'form-control col-3', 'placeholder': 'Código de barras'})
+    quantidade_do_pack.widget.attrs.update({'class': 'form-control col-3', 'placeholder': 'Unidades'})
+    valor_do_combro.widget.attrs.update({'class': 'form-control col-3', 'placeholder': 'R$'})
 
+    class Meta:
+        model = Pack
+        fields = ('__all__')

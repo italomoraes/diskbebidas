@@ -151,7 +151,7 @@
                                 <span class="hide-menu">PDV</span>
                             </a>
                         </li>
-                        <li class="sidebar-item"> 
+                        <li class="sidebar-item {% if pagina == 'todasVendas' %}selected{% endif %}"> 
                             <a class="sidebar-link" href="{% url 'todasVendas' %}" aria-expanded="false">
                                 <i class="icon-drawar"></i>
                                 <span class="hide-menu">Vendas registradas</span>
@@ -161,27 +161,33 @@
                         <li class="nav-small-cap">
                             <span class="hide-menu">Produtos</span>
                         </li>
-                        <li class="sidebar-item">
+                        <li class="sidebar-item {% if pagina == 'todosProdutos' %}selected{% endif %}">
                             <a class="sidebar-link" href="{% url 'todosProdutos' %}" aria-expanded="false">
                                 <i data-feather="tag" class="feather-icon"></i>
                                 <span class="hide-menu">Todos os produtos</span>
                             </a>
                         </li>
-                        <li class="sidebar-item ">
+                        <li class="sidebar-item {% if pagina == 'todosCombos' %}selected{% endif %}">
                             <a class="sidebar-link sidebar-link" href="{% url 'todosCombos' %}" aria-expanded="false">
                                 <i class="icon-grid"></i>
                                 <span class="hide-menu">Todos os combos</span>
                             </a>
                         </li>
-                        <li class="sidebar-item ">
+                        <li class="sidebar-item {% if pagina == 'addProdutos' %}selected{% endif %}">
                             <a class="sidebar-link sidebar-link" href="{% url 'addProdutos' %}" aria-expanded="false">
                                 <i data-feather="plus" class="feather-icon"></i>
                                 <span class="hide-menu">Adicionar produto</span>
                             </a>
                         </li>
+                        <li class="sidebar-item {% if pagina == 'addCombo' %}selected{% endif %}">
+                            <a class="sidebar-link sidebar-link" href="{% url 'addCombo' %}" aria-expanded="false">
+                                <i data-feather="plus" class="feather-icon"></i>
+                                <span class="hide-menu">Adicionar combo</span>
+                            </a>
+                        </li>
                         <li class="list-divider"></li>
                         <li class="nav-small-cap"><span class="hide-menu">Pedidos</span></li>
-                        <li class="sidebar-item {% if pagina == addEstoque %}select{% endif %}"> 
+                        <li class="sidebar-item {% if pagina == addEstoque %}selected{% endif %}"> 
                             <a class="sidebar-link" href="{% url 'addEstoque' %}" aria-expanded="false">
                                 <i class="icon-doc"></i>
                                 <span class="hide-menu">Entrada de estoque</span>
