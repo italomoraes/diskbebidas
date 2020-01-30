@@ -192,7 +192,10 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-body">
+                            <div class="card-body" style="min-height: 30em;" ng-if="caixaLivre">
+                                <h1 class="text-center" style="padding-top: 5em;">Caixa livre</h1>
+                            </div>
+                            <div class="card-body" ng-if="!caixaLivre">
                             	<div class="row">
                             		<div class="col-12">
 										<div class="table-responsive">

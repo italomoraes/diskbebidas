@@ -32,6 +32,7 @@ app.controller('controlesCtrl', function($scope, $http){
 	$scope.finalizaMensagensFlag = false;
 	$scope.finalizaMensagem;
 	$scope.descontoComboFlag = false;
+	$scope.caixaLivre = true;
 
 	$('#addModal').on('shown.bs.modal', function () {
 		$('#qtd_modal').trigger('focus')
@@ -56,13 +57,18 @@ app.controller('controlesCtrl', function($scope, $http){
 			$scope.itensNoCarrinho = [];
 			$scope.valorTotalDoCarrinho = 0.00;
 			$scope.descontoComboFlag = false;
-			angular.forEach(data, (produto) => {
-				$scope.itensNoCarrinho.push(produto);
-				$scope.valorTotalDoCarrinho += ((produto.fields.valor_de_venda*produto.fields.quantidade_vendida)-produto.fields.desconto_combo);
-				if(produto.fields.desconto_combo > 0){
-					$scope.descontoComboFlag = true;
-				}
-			});
+			if (data.length == 0){
+				$scope.caixaLivre = true;
+			} else {
+				$scope.caixaLivre = false;
+				angular.forEach(data, (produto) => {
+					$scope.itensNoCarrinho.push(produto);
+					$scope.valorTotalDoCarrinho += ((produto.fields.valor_de_venda*produto.fields.quantidade_vendida)-produto.fields.desconto_combo);
+					if(produto.fields.desconto_combo > 0){
+						$scope.descontoComboFlag = true;
+					}
+				});
+			};
 		}, err => {
 			$scope.erroTexto = "Ocorreu um erro enquanto tentávamos efetuar a operação desejada. Tente novamente.";
 			$('#erroModal').modal();
@@ -108,13 +114,18 @@ app.controller('controlesCtrl', function($scope, $http){
 			$scope.itensNoCarrinho = [];
 			$scope.valorTotalDoCarrinho = 0.00;
 			$scope.descontoComboFlag = false;
-			angular.forEach(data, (produto) => {
-				$scope.itensNoCarrinho.push(produto);
-				$scope.valorTotalDoCarrinho += ((produto.fields.valor_de_venda*produto.fields.quantidade_vendida)-produto.fields.desconto_combo);
-				if(produto.fields.desconto_combo > 0){
-					$scope.descontoComboFlag = true;
-				}
-			});
+			if (data.length == 0){
+				$scope.caixaLivre = true;
+			} else {
+				$scope.caixaLivre = false;
+				angular.forEach(data, (produto) => {
+					$scope.itensNoCarrinho.push(produto);
+					$scope.valorTotalDoCarrinho += ((produto.fields.valor_de_venda*produto.fields.quantidade_vendida)-produto.fields.desconto_combo);
+					if(produto.fields.desconto_combo > 0){
+						$scope.descontoComboFlag = true;
+					}
+				});
+			};
 		}, err => {
 			$scope.erroTexto = "Ocorreu um erro enquanto tentávamos efetuar a operação desejada. Tente novamente.";
 			$('#erroModal').modal();
@@ -129,13 +140,18 @@ app.controller('controlesCtrl', function($scope, $http){
 			$scope.itensNoCarrinho = [];
 			$scope.valorTotalDoCarrinho = 0.00;
 			$scope.descontoComboFlag = false;
-			angular.forEach(data, (produto) => {
-				$scope.itensNoCarrinho.push(produto);
-				$scope.valorTotalDoCarrinho += ((produto.fields.valor_de_venda*produto.fields.quantidade_vendida)-produto.fields.desconto_combo);
-				if(produto.fields.desconto_combo > 0){
-					$scope.descontoComboFlag = true;
-				}
-			});
+			if (data.length == 0){
+				$scope.caixaLivre = true;
+			} else {
+				$scope.caixaLivre = false;
+				angular.forEach(data, (produto) => {
+					$scope.itensNoCarrinho.push(produto);
+					$scope.valorTotalDoCarrinho += ((produto.fields.valor_de_venda*produto.fields.quantidade_vendida)-produto.fields.desconto_combo);
+					if(produto.fields.desconto_combo > 0){
+						$scope.descontoComboFlag = true;
+					}
+				});
+			};
 		}, err => {
 			$scope.erroTexto = "Ocorreu um erro enquanto tentávamos efetuar a operação desejada. Tente novamente.";
 			$('#erroModal').modal();
@@ -166,7 +182,7 @@ app.controller('controlesCtrl', function($scope, $http){
 	};
 
 	$scope.aplicaDesconto = function(){
-		$scope.valorFinal = $scope.valorTotalDoCarrinho - $scope.descontoFinal
+		$scope.valorFinal = $scope.valorTotalDoCarrinho - $scope.descontoFinal;
 	}
 
 	$scope.finalizarVenda = function(){
@@ -195,7 +211,7 @@ app.controller('controlesCtrl', function($scope, $http){
 				$('#sucessoModal').modal();
 			}, err => {
 				$('#finalizarModal').modal('hide');
-				$scope.erroTexto = "Houve um problema ao finalizar a venda."
+				$scope.erroTexto = "Houve um problema ao finalizar a venda.";
 				$('#erroModal').modal();
 			});
 		};
@@ -204,9 +220,9 @@ app.controller('controlesCtrl', function($scope, $http){
 	$scope.cancelarVenda = function(){
 		data = {
 			"venda_pk": $scope.venda_pk
-		}
+		};
 		$http.post('/api/cancelarvenda/', data).then(response => {
-			$scope.sucessoTexto = "Venda cancelada com sucesso."
+			$scope.sucessoTexto = "Venda cancelada com sucesso.";
 			$('#sucessoModal').modal();
 		}, err => {
 			$scope.erroTexto = "Não foi possível cancelar a venda.";

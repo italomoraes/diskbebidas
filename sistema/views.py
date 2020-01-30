@@ -163,7 +163,6 @@ def addCombo(request):
 	if request.method == 'POST':
 		form = addComboForm(request.POST)
 		if form.is_valid():
-			# produto = Produto.objects.get(codigo_de_barras=)
 			combo = form.save()
 			messages.add_message(request, messages.SUCCESS, 'Entrada cadastrada com sucesso para '+combo.produto.descricao)
 		else:
@@ -282,8 +281,9 @@ def addProdutoToCart(request):
 			valor_de_compra = produto.valor_de_compra,
 			quantidade_vendida = quantidade
 		)
-	combo = Pack.objects.get(produto__codigo_de_barras=produto_vendido.codigo_de_barras)
-	if produto_vendido.quantidade_vendida >= combo.quantidade_do_pack:
+	combo = Pack.objects.filter(produto__codigo_de_barras=produto_vendido.codigo_de_barras)
+	if combo.exists() and produto_vendido.quantidade_vendida >= combo.quantidade_do_pack:
+		combo = combo.first()
 		numero_de_combos = math.floor(produto_vendido.quantidade_vendida/combo.quantidade_do_pack)
 		produto_vendido.desconto_combo = numero_de_combos*((combo.quantidade_do_pack*produto_vendido.valor_de_venda)-combo.valor_do_combro)
 	else:
@@ -299,11 +299,12 @@ def alteraProdutoOnCart(request):
 	data = json.loads(request.body)
 	quantidade = int(data.get('qtd'))
 	produto_sendo_alterado = ProdutoVendido.objects.get(pk=data.get('produto_pk'))
-	combo = Pack.objects.get(produto__codigo_de_barras=produto_sendo_alterado.codigo_de_barras)
+	combo = Pack.objects.filter(produto__codigo_de_barras=produto_sendo_alterado.codigo_de_barras)
 	produto_sendo_alterado.quantidade_vendida += quantidade
 	if produto_sendo_alterado.quantidade_vendida == 0:
 		produto_sendo_alterado.delete()
-	elif produto_sendo_alterado.quantidade_vendida >= combo.quantidade_do_pack:
+	elif combo.exists() and produto_sendo_alterado.quantidade_vendida >= combo.quantidade_do_pack:
+		ombo = combo.first()
 		numero_de_combos = math.floor(produto_sendo_alterado.quantidade_vendida/combo.quantidade_do_pack)
 		produto_sendo_alterado.desconto_combo = numero_de_combos*((combo.quantidade_do_pack*produto_sendo_alterado.valor_de_venda)-combo.valor_do_combro)
 		produto_sendo_alterado.save()
