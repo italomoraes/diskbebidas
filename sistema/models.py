@@ -18,6 +18,7 @@ class Venda(models.Model):
     FORMAS_DE_PAGAMENTO = [('CR', 'Crédito'), ('DE','Débito'), ('DI','Dinheiro')]
     data_e_hora = models.DateTimeField(auto_now=True)
     valor_total = models.DecimalField(validators=[MinValueValidator(0)], max_digits=7, decimal_places=2)
+    desconto = models.DecimalField(validators=[MinValueValidator(0)], max_digits=7, decimal_places=2)
     forma_de_pagamento = models.CharField(max_length=2, choices=FORMAS_DE_PAGAMENTO)
     finalizado = models.BooleanField(default=False)
 
