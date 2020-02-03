@@ -227,15 +227,22 @@ def detalheVenda(request, pk):
 
 @login_required
 def clicaPDV(request):
-	venda = Venda.objects.latest('pk')
-	if venda.finalizado:
+	if Venda.objects.all().exists():
+		venda = Venda.objects.latest('pk')
+		if venda.finalizado:
+			venda_atual = Venda.objects.create(
+				valor_total = decimal.Decimal(0.0),
+				forma_de_pagamento = 'DI',
+				desconto = decimal.Decimal(0)
+			)
+		else:
+			venda_atual = venda
+	else:
 		venda_atual = Venda.objects.create(
 			valor_total = decimal.Decimal(0.0),
 			forma_de_pagamento = 'DI',
 			desconto = decimal.Decimal(0)
 		)
-	else:
-		venda_atual = venda
 	return redirect('pdv', pk=venda_atual.pk)
 
 @login_required
