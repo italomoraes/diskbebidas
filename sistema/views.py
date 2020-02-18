@@ -189,7 +189,7 @@ def todasVendas(request):
 			holder_final = request.GET.get('final').split('-')
 			data_inicial = datetime.date(int(holder_inicial[2]),int(holder_inicial[1]),int(holder_inicial[0])) # yyyy, mm, dd
 			data_final = datetime.date(int(holder_final[2]),int(holder_final[1]),int(holder_final[0])) # yyyy, mm, dd
-			vendas = Venda.objects.filter(data_e_hora__date__range=[data_inicial,data_final]).order_by('data_e_hora')
+			vendas = Venda.objects.filter(finalizado=True).filter(data_e_hora__date__range=[data_inicial,data_final]).order_by('data_e_hora')
 		else:
 			vendas = Venda.objects.all().filter(finalizado=True).order_by('-data_e_hora')
 	total_dinheiro = decimal.Decimal('0.0')
@@ -289,7 +289,7 @@ def addProdutoToCart(request):
 			quantidade_vendida = quantidade
 		)
 	combo = Pack.objects.filter(produto__codigo_de_barras=produto_vendido.codigo_de_barras)
-	if combo.exists() and produto_vendido.quantidade_vendida >= combo.quantidade_do_pack:
+	if combo.exists() and produto_vendido.quantidade_vendida >= combo.first().quantidade_do_pack:
 		combo = combo.first()
 		numero_de_combos = math.floor(produto_vendido.quantidade_vendida/combo.quantidade_do_pack)
 		produto_vendido.desconto_combo = numero_de_combos*((combo.quantidade_do_pack*produto_vendido.valor_de_venda)-combo.valor_do_combro)
@@ -310,7 +310,7 @@ def alteraProdutoOnCart(request):
 	produto_sendo_alterado.quantidade_vendida += quantidade
 	if produto_sendo_alterado.quantidade_vendida == 0:
 		produto_sendo_alterado.delete()
-	elif combo.exists() and produto_sendo_alterado.quantidade_vendida >= combo.quantidade_do_pack:
+	elif combo.exists() and produto_sendo_alterado.quantidade_vendida >= combo.first().quantidade_do_pack:
 		ombo = combo.first()
 		numero_de_combos = math.floor(produto_sendo_alterado.quantidade_vendida/combo.quantidade_do_pack)
 		produto_sendo_alterado.desconto_combo = numero_de_combos*((combo.quantidade_do_pack*produto_sendo_alterado.valor_de_venda)-combo.valor_do_combro)
